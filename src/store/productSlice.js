@@ -1,4 +1,3 @@
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import boots from './boots.png';
 import jeans from './jeans.png';
@@ -30,7 +29,8 @@ export const productSlice = createSlice({
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
     filter: '',
-    currentCategory: 'all'
+    currentCategory: 'all',
+    sortBy: 'default' // 'default' | 'priceAsc' | 'priceDesc'
   },
   reducers: {
     addToCart: (state, action) => {
@@ -70,6 +70,9 @@ export const productSlice = createSlice({
     setCategory: (state, action) => {
       state.currentCategory = action.payload;
     },
+    setSortBy: (state, action) => {
+      state.sortBy = action.payload;
+    },
     loadCart: (state) => {
       const savedCart = localStorage.getItem('cart');
       if (savedCart) {
@@ -101,17 +104,31 @@ export const {
   clearCart,
   setFilter,
   setCategory,
+  setSortBy,
   loadCart
 } = productSlice.actions;
 
 export const selectProducts = state => {
-  const { items, filter, currentCategory } = state.products;
+  const { items, filter, currentCategory, sortBy } = state.products;
   
-  return items
-    .filter(product => 
-      (currentCategory === 'all' || product.category === currentCategory) &&
-      (filter === '' || product.title.toLowerCase().includes(filter.toLowerCase()))
-    );
+  let filteredProducts = items.filter(product => 
+    (currentCategory === 'all' || product.category === currentCategory) &&
+    (filter === '' || product.title.toLowerCase().includes(filter.toLowerCase()))
+  );
+
+  // Применяем сортировку
+  switch (sortBy) {
+    case 'priceAsc':
+      filteredProducts.sort((a, b) => a.price - b.price);
+      break;
+    case 'priceDesc':
+      filteredProducts.sort((a, b) => b.price - a.price);
+      break;
+    default:
+      break;
+  }
+
+  return filteredProducts;
 };
 
 export const selectCart = state => state.products.cart;
