@@ -1,6 +1,6 @@
-
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart, selectProducts } from '../store/productSlice';
+import ProductReviews from './ProductReviews';
 
 export default function ProductList() {
   const products = useSelector(selectProducts);
@@ -41,6 +41,7 @@ export default function ProductList() {
                 В корзину
               </button>
             </div>
+            <ProductReviews productId={product.id} />
           </div>
         </div>
       ))}

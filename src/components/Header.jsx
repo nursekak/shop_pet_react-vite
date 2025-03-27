@@ -18,7 +18,7 @@ export default function Header({ onCartClick }) {
   return (
     <header className="shop-header">
       <div className="logo">
-        <h1>МойМагазин</h1>
+        <h1>Shop777</h1>
       </div>
       <div className="header-actions">
         <ThemeToggle />

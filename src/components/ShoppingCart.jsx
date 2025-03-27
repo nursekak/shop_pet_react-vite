@@ -1,4 +1,4 @@
-
+import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
   removeFromCart, 
@@ -8,11 +8,22 @@ import {
   selectCart,
   selectCartTotal
 } from '../store/productSlice';
+import { selectPaymentStatus } from '../store/paymentSlice';
+import PaymentForm from './PaymentForm';
 
 export default function ShoppingCart({ isOpen, onClose }) {
+  const [showPayment, setShowPayment] = useState(false);
   const cartItems = useSelector(selectCart);
   const cartTotal = useSelector(selectCartTotal);
+  const paymentStatus = useSelector(selectPaymentStatus);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (paymentStatus === 'succeeded') {
+      // Закрываем корзину после успешной оплаты
+      onClose();
+    }
+  }, [paymentStatus, onClose]);
   
   if (!isOpen) return null;
   
@@ -31,13 +42,15 @@ export default function ShoppingCart({ isOpen, onClose }) {
   const handleClearCart = () => {
     dispatch(clearCart());
   };
-  
-  const handleCheckout = () => {
-    alert('Заказ оформлен! В реальном приложении здесь была бы форма оформления заказа.');
-    dispatch(clearCart());
-    onClose();
+
+  const handlePayment = () => {
+    setShowPayment(true);
   };
 
+  const handleClosePayment = () => {
+    setShowPayment(false);
+  };
+  
   return (
     <div className="cart-overlay">
       <div className="cart-modal">
@@ -46,49 +59,55 @@ export default function ShoppingCart({ isOpen, onClose }) {
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
         
-        {cartItems.length === 0 ? (
-          <div className="empty-cart">Ваша корзина пуста</div>
+        {showPayment ? (
+          <PaymentForm total={cartTotal} onClose={handleClosePayment} />
         ) : (
           <>
-            <div className="cart-items">
-              {cartItems.map(item => (
-                <div key={item.id} className="cart-item">
-                  <img src={item.image} alt={item.title} className="cart-item-image" />
-                  <div className="cart-item-details">
-                    <h3>{item.title}</h3>
-                    <div className="cart-item-price">{item.price} ₽</div>
-                  </div>
-                  <div className="cart-item-actions">
-                    <div className="quantity-control">
-                      <button onClick={() => handleDecrement(item.id)}>-</button>
-                      <span>{item.quantity}</span>
-                      <button onClick={() => handleIncrement(item.id)}>+</button>
+            {cartItems.length === 0 ? (
+              <div className="empty-cart">Ваша корзина пуста</div>
+            ) : (
+              <>
+                <div className="cart-items">
+                  {cartItems.map(item => (
+                    <div key={item.id} className="cart-item">
+                      <img src={item.image} alt={item.title} className="cart-item-image" />
+                      <div className="cart-item-details">
+                        <h3>{item.title}</h3>
+                        <div className="cart-item-price">{item.price} ₽</div>
+                      </div>
+                      <div className="cart-item-actions">
+                        <div className="quantity-control">
+                          <button onClick={() => handleDecrement(item.id)}>-</button>
+                          <span>{item.quantity}</span>
+                          <button onClick={() => handleIncrement(item.id)}>+</button>
+                        </div>
+                        <button 
+                          className="remove-btn"
+                          onClick={() => handleRemove(item.id)}
+                        >
+                          Удалить
+                        </button>
+                      </div>
                     </div>
-                    <button 
-                      className="remove-btn"
-                      onClick={() => handleRemove(item.id)}
-                    >
-                      Удалить
+                  ))}
+                </div>
+                
+                <div className="cart-footer">
+                  <div className="cart-total">
+                    <span>Итого:</span>
+                    <span>{cartTotal} ₽</span>
+                  </div>
+                  <div className="cart-actions">
+                    <button className="clear-cart-btn" onClick={handleClearCart}>
+                      Очистить корзину
+                    </button>
+                    <button className="checkout-btn" onClick={handlePayment}>
+                      Оформить заказ
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
-            
-            <div className="cart-footer">
-              <div className="cart-total">
-                <span>Итого:</span>
-                <span>{cartTotal} ₽</span>
-              </div>
-              <div className="cart-actions">
-                <button className="clear-cart-btn" onClick={handleClearCart}>
-                  Очистить корзину
-                </button>
-                <button className="checkout-btn" onClick={handleCheckout}>
-                  Оформить заказ
-                </button>
-              </div>
-            </div>
+              </>
+            )}
           </>
         )}
       </div>
