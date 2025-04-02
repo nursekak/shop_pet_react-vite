@@ -6,6 +6,7 @@ import { selectCurrentUser } from '../store/userSlice';
 export default function ProductReviews({ productId }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [showReviewForm, setShowReviewForm] = useState(false);
   const dispatch = useDispatch();
   const reviews = useSelector(state => selectReviews(state, productId));
   const status = useSelector(selectReviewStatus);
@@ -38,6 +39,7 @@ export default function ProductReviews({ productId }) {
     }));
     setRating(0);
     setComment('');
+    setShowReviewForm(false);
   };
 
   const averageRating = reviews.length > 0
@@ -62,33 +64,44 @@ export default function ProductReviews({ productId }) {
       </div>
 
       {currentUser && (
-        <form onSubmit={handleSubmit} className="review-form">
-          <div className="rating-input">
-            <label>Ваша оценка:</label>
-            <div className="stars">
-              {[1, 2, 3, 4, 5].map(star => (
-                <span
-                  key={star}
-                  className={`star ${star <= rating ? 'filled' : ''}`}
-                  onClick={() => setRating(star)}
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="form-group">
-            <label htmlFor="comment">Ваш отзыв:</label>
-            <textarea
-              id="comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              required
-              rows="4"
-            />
-          </div>
-          <button type="submit">Отправить отзыв</button>
-        </form>
+        <div className="review-form-container">
+          <button 
+            className="toggle-review-form-btn"
+            onClick={() => setShowReviewForm(!showReviewForm)}
+          >
+            {showReviewForm ? 'Скрыть форму отзыва' : 'Оставить отзыв'}
+          </button>
+          
+          {showReviewForm && (
+            <form onSubmit={handleSubmit} className="review-form">
+              <div className="rating-input">
+                <label>Ваша оценка:</label>
+                <div className="stars">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <span
+                      key={star}
+                      className={`star ${star <= rating ? 'filled' : ''}`}
+                      onClick={() => setRating(star)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="form-group">
+                <label htmlFor="comment">Ваш отзыв:</label>
+                <textarea
+                  id="comment"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  required
+                  rows="4"
+                />
+              </div>
+              <button type="submit" className="submit-review-btn">Отправить отзыв</button>
+            </form>
+          )}
+        </div>
       )}
 
       {!currentUser && (

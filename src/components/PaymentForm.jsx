@@ -142,7 +142,7 @@ export default function PaymentForm({ total, onClose }) {
             <div className="form-group">
               <label htmlFor="cvv">CVV:</label>
               <input
-                type="text"
+                type="password"
                 id="cvv"
                 value={cvv}
                 onChange={(e) => setCvv(e.target.value.replace(/[^0-9]/g, ''))}
